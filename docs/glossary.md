@@ -1,0 +1,37 @@
+# Glossary (Simple English)
+
+- **Spring Boot:** Framework that makes it easier to create and run Java applications.
+- **REST API:** A way for software systems to exchange data over HTTP using methods such as GET, POST, PUT, and DELETE.
+- **Controller:** Class that receives HTTP requests and returns HTTP responses.
+- **Service:** Class containing business rules and application operations.
+- **Repository:** Interface used to read and write data through Spring Data.
+- **Entity:** Java class mapped to a database table.
+- **DTO:** Data Transfer Object; a class designed to carry request/response data. `MealLogRequest` carries meal-log input.
+- **JPA:** Java Persistence API, a standard for mapping Java objects to relational database data.
+- **Hibernate:** ORM implementation used by JPA to translate entity operations into SQL.
+- **ORM:** Object-Relational Mapping; connecting Java objects to database rows.
+- **Dependency injection:** A framework supplies a class with the objects it needs instead of the class constructing them itself.
+- **`JpaRepository`:** Spring Data interface providing common CRUD and paging/sorting operations.
+- **Validation:** Rules that reject missing or invalid input, such as a blank food name.
+- **Exception handling:** Converts errors into controlled responses instead of leaving them unhandled.
+- **`@RestControllerAdvice`:** Spring annotation for centralized handling of exceptions thrown by controllers.
+- **HTTP status code:** Number describing the outcome, e.g. 200 success, 201 created, 204 no content, 400 bad request, 404 not found.
+- **Maven:** Build tool that downloads dependencies, compiles code, and runs tests.
+- **Maven Wrapper:** Project scripts (`mvnw`, `mvnw.cmd`) that invoke a project-compatible Maven version.
+- **Unit test:** Test of a small piece of behavior in isolation.
+- **JUnit:** Java test framework for defining tests and assertions.
+- **Mockito:** Library for creating mock dependencies and verifying calls.
+- **Mock:** A substitute object used during tests instead of a real database/repository.
+- **Swagger UI:** Browser interface for exploring and trying API endpoints from the OpenAPI description.
+- **OpenAPI:** A standard description of an HTTP API.
+- **Postman:** Tool for sending API requests and checking responses.
+- **CORS:** Browser security mechanism controlling which website origins can call a server.
+- **Foreign key:** Database constraint linking a column in one table to a row in another table.
+- **Primary key:** Column or columns that uniquely identify a row.
+- **Enum:** Java type whose values come from a fixed list, such as `DietType.VEG`.
+- **JSON:** Text format commonly used to send structured data in REST requests and responses.
+- **BMR:** Basal Metabolic Rate, an estimate of energy needed at rest.
+- **TDEE:** Total Daily Energy Expenditure, estimated BMR adjusted by an activity multiplier.
+- **Mifflin–St Jeor equation:** Equation used here to estimate BMR from weight, height, age, and gender.
+- **React:** JavaScript library used to build user interfaces.
+- **Vite:** Frontend development server and build tool.

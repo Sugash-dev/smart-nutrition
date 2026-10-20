@@ -1,140 +1,63 @@
-\# System Architecture
-
-
-
-\## 1. Project Overview
-
-
-
-The Smart Nutrition Analysis and Personalized Meal Recommendation System is a Spring Boot application that helps users track their food intake, calculate daily nutritional consumption, and receive personalized food recommendations.
-
-
-
-\## 2. Technology Stack
-
-
-
-\- \*\*Programming Language:\*\* Java 17
-
-\- \*\*Backend Framework:\*\* Spring Boot
-
-\- \*\*Web Layer:\*\* Spring Web MVC
-
-\- \*\*Persistence:\*\* Spring Data JPA and Hibernate
-
-\- \*\*Database:\*\* MySQL 8
-
-\- \*\*Validation:\*\* Jakarta Validation
-
-\- \*\*API Documentation:\*\* Springdoc OpenAPI
-
-\- \*\*Testing:\*\* JUnit and Mockito
-
-\- \*\*API Testing:\*\* Postman
-
-
-
-\## 3. Application Layers
-
-
-
-\### Controller Layer
-
-
-
-Handles incoming HTTP requests and returns responses to clients. It exposes endpoints for users, foods, meal logs, nutrition summaries, and food recommendations.
-
-
-
-\### Service Layer
-
-
-
-Contains the application's business logic.
-
-
-
-\- \*\*UserService:\*\* Manages user operations and calculates daily calorie targets.
-
-\- \*\*FoodService:\*\* Manages food-related operations.
-
-\- \*\*MealLogService:\*\* Records and retrieves meal logs.
-
-\- \*\*NutritionService:\*\* Calculates nutritional summaries and generates food recommendations.
-
-
-
-\### Repository Layer
-
-
-
-Uses Spring Data JPA to communicate with the database.
-
-
-
-\- \*\*UserRepository:\*\* Performs user database operations.
-
-\- \*\*FoodRepository:\*\* Performs food database operations and supports filtering by diet type.
-
-\- \*\*MealLogRepository:\*\* Performs meal-log operations and retrieves logs by user and date.
-
-
-
-\### Model Layer
-
-
-
-Defines the application's data entities, including `User`, `Food`, and `MealLog`.
-
-
-
-\### Exception Handling and Validation
-
-
-
-The application uses resource-not-found exception handling and Jakarta Validation to help manage invalid or missing data.
-
-
-
-\## 4. Request Processing Flow
-
-
-
-1\. A client sends an HTTP request to an API endpoint.
-
-2\. The controller receives and processes the request.
-
-3\. The service layer executes the required business logic.
-
-4\. The repository interacts with the MySQL database when necessary.
-
-5\. The result returns through the service and controller layers to the client.
-
-
-
-\## 5. Database Relationships
-
-
-
-\- A user can have multiple meal logs.
-
-\- A food item can be referenced by multiple meal logs.
-
-\- Each meal log links a user, a food item, a date, and the number of servings.
-
-
-
-\## 6. Testing Approach
-
-
-
-Service-layer unit tests use JUnit and Mockito to test business logic independently of the database. Repository dependencies are mocked to verify successful operations and exception-handling scenarios.
-
-
-
-\## 7. Architecture Summary
-
-
-
-The application follows a layered architecture that separates request handling, business logic, database access, and data representation. This separation improves maintainability and makes individual service components easier to test.
-
+# System Architecture
+
+## Overview
+The backend uses a layered Spring architecture. The React/Vite frontend can call the REST endpoints; controllers delegate to services, services use repositories, and Spring Data JPA/Hibernate persists entities in MySQL.
+
+## Architecture diagram
+```mermaid
+flowchart TD
+  Client[React frontend / Postman / Swagger] --> Controller[REST Controller]
+  Controller --> Validation[Jakarta Validation]
+  Controller --> Service[Service layer]
+  Service --> Repository[Spring Data JPA repository]
+  Repository --> ORM[JPA / Hibernate]
+  ORM --> Database[(MySQL)]
+  Controller --> Advice[GlobalExceptionHandler]
+  Service --> Exception[ResourceNotFoundException]
+```
+
+## Request-response sequence
+```mermaid
+sequenceDiagram
+  participant Client
+  participant Controller
+  participant Service
+  participant Repository
+  participant DB as MySQL
+  Client->>Controller: HTTP request + JSON/query/path data
+  Controller->>Controller: Bind request and validate where configured
+  Controller->>Service: Call business method
+  Service->>Repository: Find/save/delete data
+  Repository->>DB: JPA/Hibernate SQL operation
+  DB-->>Repository: Rows/result
+  Repository-->>Service: Entity or result
+  Service-->>Controller: Return result
+  Controller-->>Client: HTTP status + JSON or empty response
+```
+
+## Layers and important classes
+- **Application entry point:** `SmartNutritionApplication` starts Spring Boot.
+- **Controller:** `UserController`, `FoodController`, `MealLogController`, and `NutritionController` map HTTP requests to service calls and choose response status codes.
+- **Service:** `UserService`, `FoodService`, `MealLogService`, and `NutritionService` implement business logic.
+- **Repository:** `UserRepository`, `FoodRepository`, and `MealLogRepository` extend `JpaRepository`.
+- **Model/entity:** `User`, `Food`, and `MealLog` represent persisted data.
+- **DTO:** `MealLogRequest` accepts IDs and values for creating a meal log without requiring the client to submit nested entity objects.
+- **Exception handling:** `ResourceNotFoundException` represents missing resources; `GlobalExceptionHandler` maps known errors to JSON responses.
+- **Configuration:** `WebConfig` defines CORS origins and allowed HTTP methods.
+- **Seeding:** `DataSeeder` inserts 20 foods only when the food table has no rows.
+
+## Example flow: create a meal log
+1. Client sends `POST /api/meal-logs` with `userId`, `foodId`, `logDate`, and `servings`.
+2. `MealLogController.logMeal` validates the `MealLogRequest`.
+3. `MealLogService.logMeal` loads the user and food; either missing resource triggers `ResourceNotFoundException`.
+4. Service creates a `MealLog` and saves it through `MealLogRepository`.
+5. Controller returns HTTP 201 with the saved meal log.
+
+## Deletion behavior
+`UserService.delete` checks the user exists, deletes meal logs for that user through `MealLogRepository.deleteByUserId`, then deletes the user. `FoodService.delete` similarly removes logs for a food before deleting the food. These methods are transactional.
+
+## CORS
+`WebConfig` allows origins on localhost ports 5173, 5174, and 5175 and methods GET, POST, PUT, DELETE, OPTIONS. This is local development configuration, not an unrestricted production CORS policy.
+
+## Important verification note
+In the uploaded ZIP, `MealLogRepository.java` appears to contain unrelated pasted prose inside the Java interface body, which would prevent compilation if present in the working checkout. It was not changed as part of documentation work. Compare it with the known intended repository methods and repair it separately before running tests.
