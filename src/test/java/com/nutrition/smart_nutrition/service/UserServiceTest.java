@@ -8,6 +8,7 @@ import com.nutrition.smart_nutrition.model.enums.DietType;
 import com.nutrition.smart_nutrition.model.enums.Gender;
 import com.nutrition.smart_nutrition.model.enums.Goal;
 import com.nutrition.smart_nutrition.repository.UserRepository;
+import com.nutrition.smart_nutrition.repository.MealLogRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,6 +27,9 @@ class UserServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private MealLogRepository mealLogRepository;
+
     @InjectMocks
     private UserService userService;
 
@@ -35,8 +39,8 @@ class UserServiceTest {
         user.setEmail("test@example.com");
         user.setAge(20);
         user.setGender(Gender.MALE);
-        user.setHeightCm(170);
-        user.setWeightKg(70);
+        user.setHeightCm(170.0);
+        user.setWeightKg(70.0);
         user.setActivityLevel(ActivityLevel.MODERATE);
         user.setGoal(Goal.MAINTAIN);
         user.setDietType(DietType.values()[0]);
@@ -100,7 +104,7 @@ class UserServiceTest {
         User updatedUser = createUser();
 
         updatedUser.setName("Updated User");
-        updatedUser.setWeightKg(80);
+        updatedUser.setWeightKg(80.0);
 
         when(userRepository.findById(1L))
                 .thenReturn(Optional.of(existingUser));
@@ -132,24 +136,24 @@ class UserServiceTest {
     void deleteRemovesExistingUser() {
         User user = createUser();
 
-        when(userRepository.findById(1L))
-                .thenReturn(Optional.of(user));
+        when(userRepository.existsById(1L)).thenReturn(true);
 
         userService.delete(1L);
 
-        verify(userRepository).delete(user);
+        verify(mealLogRepository).deleteByUserId(1L);
+        verify(userRepository).deleteById(1L);
     }
 
     @Test
     void deleteThrowsExceptionWhenUserDoesNotExist() {
-        when(userRepository.findById(99L))
-                .thenReturn(Optional.empty());
+        when(userRepository.existsById(99L)).thenReturn(false);
 
         assertThrows(
                 ResourceNotFoundException.class,
                 () -> userService.delete(99L)
         );
 
-        verify(userRepository, never()).delete(any(User.class));
+        verify(mealLogRepository, never()).deleteByUserId(anyLong());
+        verify(userRepository, never()).deleteById(anyLong());
     }
 }

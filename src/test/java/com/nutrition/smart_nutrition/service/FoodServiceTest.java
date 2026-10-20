@@ -5,6 +5,7 @@ import com.nutrition.smart_nutrition.exception.ResourceNotFoundException;
 import com.nutrition.smart_nutrition.model.Food;
 import com.nutrition.smart_nutrition.model.enums.DietType;
 import com.nutrition.smart_nutrition.repository.FoodRepository;
+import com.nutrition.smart_nutrition.repository.MealLogRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -22,6 +23,9 @@ class FoodServiceTest {
 
     @Mock
     private FoodRepository foodRepository;
+
+    @Mock
+    private MealLogRepository mealLogRepository;
 
     @InjectMocks
     private FoodService foodService;
@@ -125,24 +129,24 @@ class FoodServiceTest {
     void deleteRemovesExistingFood() {
         Food food = createFood();
 
-        when(foodRepository.findById(1L))
-                .thenReturn(Optional.of(food));
+        when(foodRepository.existsById(1L)).thenReturn(true);
 
         foodService.delete(1L);
 
-        verify(foodRepository).delete(food);
+        verify(mealLogRepository).deleteByFoodId(1L);
+        verify(foodRepository).deleteById(1L);
     }
 
     @Test
     void deleteThrowsExceptionWhenFoodDoesNotExist() {
-        when(foodRepository.findById(99L))
-                .thenReturn(Optional.empty());
+        when(foodRepository.existsById(99L)).thenReturn(false);
 
         assertThrows(
                 ResourceNotFoundException.class,
                 () -> foodService.delete(99L)
         );
 
-        verify(foodRepository, never()).delete(any(Food.class));
+        verify(mealLogRepository, never()).deleteByFoodId(anyLong());
+        verify(foodRepository, never()).deleteById(anyLong());
     }
 }

@@ -21,54 +21,47 @@ public class MealLogService {
     private final UserRepository userRepository;
     private final FoodRepository foodRepository;
 
-    // Log a food consumed by a user
-    public MealLog logMeal(Long userId, Long foodId,
-                           LocalDate date, double servings) {
-
-        // Find the user
+    public MealLog logMeal(
+            Long userId,
+            Long foodId,
+            LocalDate date,
+            double servings
+    ) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "User not found with id: " + userId
-                        )
-                );
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "User not found with id: " + userId
+                ));
 
-        // Find the food
         Food food = foodRepository.findById(foodId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Food not found with id: " + foodId
-                        )
-                );
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Food not found with id: " + foodId
+                ));
 
-        // Create the meal log
         MealLog mealLog = new MealLog();
         mealLog.setUser(user);
         mealLog.setFood(food);
         mealLog.setLogDate(date);
         mealLog.setServings(servings);
 
-        // Save and return the meal log
         return mealLogRepository.save(mealLog);
     }
 
-    // Get all meal logs for a user on a particular date
     public List<MealLog> getLogs(Long userId, LocalDate date) {
+        if (!userRepository.existsById(userId)) {
+            throw new ResourceNotFoundException(
+                    "User not found with id: " + userId
+            );
+        }
+
         return mealLogRepository.findByUserIdAndLogDate(userId, date);
     }
 
-    // Delete a meal log
     public void deleteLog(Long id) {
-
-        // Check whether the meal log exists
         MealLog mealLog = mealLogRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Meal log not found with id: " + id
-                        )
-                );
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Meal log not found with id: " + id
+                ));
 
-        // Delete the meal log
         mealLogRepository.delete(mealLog);
     }
 }

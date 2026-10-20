@@ -3,8 +3,10 @@ package com.nutrition.smart_nutrition.service;
 import com.nutrition.smart_nutrition.exception.ResourceNotFoundException;
 import com.nutrition.smart_nutrition.model.Food;
 import com.nutrition.smart_nutrition.repository.FoodRepository;
+import com.nutrition.smart_nutrition.repository.MealLogRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -13,36 +15,25 @@ import java.util.List;
 public class FoodService {
 
     private final FoodRepository foodRepository;
+    private final MealLogRepository mealLogRepository;
 
-    // Create food
     public Food create(Food food) {
         return foodRepository.save(food);
     }
 
-    // Get all foods
     public List<Food> getAll() {
         return foodRepository.findAll();
     }
 
-    // Get food by ID
     public Food getById(Long id) {
         return foodRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Food not found with id: " + id
-                        )
-                );
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Food not found with id: " + id
+                ));
     }
 
-    // Update food
     public Food update(Long id, Food updatedFood) {
-
-        Food food = foodRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Food not found with id: " + id
-                        )
-                );
+        Food food = getById(id);
 
         food.setName(updatedFood.getName());
         food.setCalories(updatedFood.getCalories());
@@ -54,16 +45,18 @@ public class FoodService {
         return foodRepository.save(food);
     }
 
-    // Delete food
+    @Transactional
     public void delete(Long id) {
+        if (!foodRepository.existsById(id)) {
+            throw new ResourceNotFoundException(
+                    "Food not found with id: " + id
+            );
+        }
 
-        Food food = foodRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Food not found with id: " + id
-                        )
-                );
+        // A food may be referenced by meal logs.
+        // Remove those dependent rows first so the delete is safe.
+        mealLogRepository.deleteByFoodId(id);
 
-        foodRepository.delete(food);
+        foodRepository.deleteById(id);
     }
 }
