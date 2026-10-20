@@ -11,13 +11,13 @@ import java.util.List;
 
 public interface MealLogRepository extends JpaRepository<MealLog, Long> {
 
-    List<MealLog> findByUserIdAndLogDate(Long userId, LocalDate date);
+    List<MealLog> findByUserIdAndLogDate(Long userId, LocalDate logDate);
 
     @Modifying
     @Query("DELETE FROM MealLog m WHERE m.user.id = :userId")
-    int deleteByUserId(@Param("userId") Long userId);
+    void deleteByUserId(@Param("userId") Long userId);
 
     @Modifying
     @Query("DELETE FROM MealLog m WHERE m.food.id = :foodId")
-    int deleteByFoodId(@Param("foodId") Long foodId);
+    void deleteByFoodId(@Param("foodId") Long foodId);
 }
