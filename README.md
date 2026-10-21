@@ -165,4 +165,3 @@ Run `.\mvnw.cmd clean test`. Existing test classes and scenarios are described i
 - [Setup and installation](docs/setup-and-installation.md)
 - [User guide](docs/user-guide.md)
 - [Glossary](docs/glossary.md)
-- [Viva preparation](docs/viva-preparation.md)
